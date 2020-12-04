@@ -10,7 +10,7 @@ import com.ace.cache.parser.ICacheResultParser;
 /**
  * 默认缓存结果解析类
  *
- * @author wanghaobin
+ * @author 小郎君
  * @description
  * @date 2017年5月18日
  * @since 1.7
@@ -24,7 +24,13 @@ public class DefaultResultParser implements ICacheResultParser {
             ParameterizedType parameterizedType = (ParameterizedType) type;
             Type rawType = parameterizedType.getRawType();
             if (((Class) rawType).isAssignableFrom(List.class)) {
-                result = JSON.parseArray(value, (Class) parameterizedType.getActualTypeArguments()[0]);
+                //fix 多层泛型引起的bug
+                if (parameterizedType.getActualTypeArguments()[0] instanceof ParameterizedType) {
+                    result = JSON.parseArray(value, parameterizedType.getActualTypeArguments());
+                }
+                else {
+                    result = JSON.parseArray(value, (Class) parameterizedType.getActualTypeArguments()[0]);
+                }
             }
         } else if (origins == null) {
             result = JSON.parseObject(value, (Class) type);
